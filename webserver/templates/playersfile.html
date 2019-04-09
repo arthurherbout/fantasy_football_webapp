@@ -8,18 +8,20 @@
 
 
 <body>
-  <h1>List of all players</h1>
+  <h1>List of top-scorer players</h1>
   <table>
     <tr>
       <th>Player</th>
       <th>Club</th>
+      <th> Goals</th>
     </tr>
-    {% for player, pid, club, cid in data %}
+    {% for player, pid, club, cid, count in data %}
       <tr>
         <td>
           <a href = '/players/{{pid}}'</a> {{player}} </td>
         <td>
           <a href = '/clubs/{{cid}}'</a> {{club}} </td>
+        <td> {{count}}
       </tr>
     {% endfor %}
   </table>
