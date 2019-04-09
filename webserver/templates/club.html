@@ -1,0 +1,46 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>Description of club {{club}}</h1>
+  <table>
+    <tr>
+      <th>Players</th>
+      <th>Goals scored</th>
+    </tr>
+    {% for players, ngoals in data1 %}
+      <tr>
+        <td> {{player}} </td>
+        <td> {{ngoals}}
+      </tr>
+    {% endfor %}
+  </table>
+
+  <table>
+    <tr>
+      <th> Home Team</th>
+      <th> Home Goals</th>
+      <th> Away Goals</th>
+      <th> Away Team</th>
+    </tr>
+    {% for hteam, hgoal, agoal, ateam in data2 %}
+      <tr>
+        <td>
+          <a href = '/clubs/{{hteam}}'</a> {{hteam}}</td>
+        <td> {{hgoal}}</td>
+        <td> {{agoal}}</td>
+        <td>
+          <a href = 'clubs/{{ateam}}'</a>  {{ateam}}</td>
+      </tr>
+  </table>
+
+</body>
+
+
+</html>

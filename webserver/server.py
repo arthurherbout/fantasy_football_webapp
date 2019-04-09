@@ -248,8 +248,8 @@ def rlmatches():
 
     rlmatches = []
     for i in range(len(rlmatchdays)):
-        rlmatches.append(rlmatchdays[i])
-        cursor = g.conn.execute("SELECT hteamgoals h,ateamgoals a FROM real_life_matchday WHERE rmdid = %s", rmdid)
+        rlmatches.append([rlmatchdays[i][0]])
+        cursor = g.conn.execute("SELECT hteamgoals h,ateamgoals a FROM play_real_life_match WHERE rmdid = %s", rlmatchdays[i][0])
         for result in cursor:
             rlmatches[i].append(result)
         cursor.close()

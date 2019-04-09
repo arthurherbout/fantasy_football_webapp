@@ -16,7 +16,8 @@
     </tr>
     {% for club, ngoals in data %}
       <tr>
-        <td> {{club}} </td>
+        <td>
+          <a href = '/clubs/{{club}}' </a> {{club}} </td>
         <td> {{ngoals}}
       </tr>
     {% endfor %}
