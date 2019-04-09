@@ -204,6 +204,16 @@ def players():
     context = dict(data = players)
     return render_template("playersfile.html", **context)
 
+@app.route('/players/<name>')
+def player(name):
+    cursor = g.conn.execute("SELECT c.name, sum(score.ngoals) ngoals FROM real_life_player_own p JOIN score ON p.pid = score.pid JOIN clubs c ON p.cid=c.cid WHERE p.name=%s group by c.name", name)
+    data = []
+    for result in cursor:
+        data.append(result)
+    cursor.close()
+
+    context = dict(data=data, player = name)
+    return render_template("player.html", **context)
 
 @app.route('/clubs/')
 def clubs():
