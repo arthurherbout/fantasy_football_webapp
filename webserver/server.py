@@ -207,8 +207,13 @@ def roster(lid, uid):
         roster.append(result)
     roster_cursor.close()
 
-    #lname_cursor = g.conn.execute("SE")
-    context = dict(roster = roster, uid = uid)#, lname = lname)
+    lname_cursor = g.conn.execute("SELECT DISTINCT lname FROM leagues WHERE lid = %s", lid)
+    lname = 0
+    for result in lname_cursor:
+        lname = result[0]
+        break
+    lname_cursor.close()
+    context = dict(roster = roster, uid = uid, lname = lname)
     return render_template("roster.html", **context)
 
 @app.route('/login')
@@ -279,7 +284,7 @@ def club(cid):
 
 @app.route('/leagues/')
 def leagues():
-    cursor = g.conn.execute("SELECT lname FROM leagues")
+    cursor = g.conn.execute("SELECT lname, lid FROM leagues")
     leagues = []
     for result in cursor:
         leagues.append(result)
@@ -287,6 +292,22 @@ def leagues():
 
     context = dict(data = leagues)
     return render_template("leaguesfile.html", **context)
+
+@app.route('/leagues/<lid>')
+def league(lid):
+
+    lname_cursor = g.conn.execute("SELECT DISTINCT lname FROM leagues WHERE lid = %s", lid)
+    lname = 0
+    for result in lname_cursor:
+        lname = result[0]
+        break
+    lname_cursor.close()
+
+    context = dict(lname=lname)
+    return render_template("league.html", **context)
+
+
+
 
 @app.route('/rlmatches/')
 def rlmatches():

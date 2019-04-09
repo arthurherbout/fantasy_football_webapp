@@ -13,9 +13,12 @@
     <tr>
       <th>Virtual League name</th>
     </tr>
-    {% for league in data %}
+    {% for league, lid in data %}
       <tr>
         <td> {{league}} </td>
+        <td>
+          <a href = '/leagues/{{lid}}'</a> See league details
+        </td>
       </tr>
     {% endfor %}
   </table>
