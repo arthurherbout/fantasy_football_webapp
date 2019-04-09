@@ -185,7 +185,7 @@ def users():
 
     context = dict(data = users)
     return render_template("usersfile.html", **context)
-    
+
 
 
 @app.route('/login')
@@ -203,6 +203,8 @@ def players():
 
     context = dict(data = players)
     return render_template("playersfile.html", **context)
+
+
 
 if __name__ == "__main__":
   import click
