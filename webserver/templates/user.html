@@ -1,0 +1,28 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>Homepage for user {{username}}</h1>
+  <table>
+    <tr>
+      <th>Leagues</th>
+      <th>Ranking</th>
+      <th>Roster</th>
+    </tr>
+    {% for league, lid in leagues %}
+      <tr>
+        <td>
+          <a href = '/leagues'</a> {{league}} </td>
+        <td> SHOW RANKING </td>
+        <td>
+          <a href = '/rosters/{{lid}}/{{username}}'</a> See the roster</td>
+      </tr>
+    {% endfor %}
+
+</body>

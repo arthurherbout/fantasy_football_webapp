@@ -186,7 +186,30 @@ def users():
     context = dict(data = users)
     return render_template("usersfile.html", **context)
 
+# user page
+@app.route('/users/<uid>')
+def user(uid):
+    league_cursor = g.conn.execute("SELECT l.lname, l.lid FROM leagues l JOIN participate p ON l.lid = p.lid where username = %s ", uid)
+    leagues = []
+    for result in league_cursor:
+        leagues.append(result)
+    league_cursor.close()
 
+    context = dict(leagues= leagues, username = uid)
+    return render_template("user.html", **context)
+
+# roster page
+@app.route('/rosters/<lid>/<uid>')
+def roster(lid, uid):
+    roster_cursor = g.conn.execute("SELECT p.name, p.pid FROM real_life_player_own p JOIN draft d ON d.pid = p.pid WHERE d.username = %s AND d.lid= %s", (uid, lid))
+    roster = []
+    for result in roster_cursor:
+        roster.append(result)
+    roster_cursor.close()
+
+    #lname_cursor = g.conn.execute("SE")
+    context = dict(roster = roster, uid = uid)#, lname = lname)
+    return render_template("roster.html", **context)
 
 @app.route('/login')
 def login():
@@ -212,7 +235,13 @@ def player(pid):
         data.append(result)
     cursor.close()
 
-    context = dict(data=data)
+    cursor2 = g.conn.execute("SELECT d.username, l.lname from draft d join real_life_player_own r on d.pid = r.pid join leagues l on l.lid = d.lid where r.name =%s", name)
+    data2 = []
+    for result in cursor2:
+        data2.append(result)
+    cursor2.close()
+
+    context = dict(data=data, data2 = data2)
     return render_template("player.html", **context)
 
 @app.route('/clubs/')
