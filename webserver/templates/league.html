@@ -13,10 +13,10 @@
     <tr>
       <th>Users</th>
     </tr>
-    {% for player, pid in roster %}
+    {% for user in users %}
       <tr>
         <td>
-          <a href = '/players/{{pid}}'</a> {{player}} </td>
+          <a href = '/users/{{user}}'</a> {{user}} </td>
       </tr>
     {% endfor %}
 

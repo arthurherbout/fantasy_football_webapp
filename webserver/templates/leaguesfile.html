@@ -15,10 +15,8 @@
     </tr>
     {% for league, lid in data %}
       <tr>
-        <td> {{league}} </td>
         <td>
-          <a href = '/leagues/{{lid}}'</a> See league details
-        </td>
+          <a href = '/leagues/{{lid}}'</a> {{league}} </td>
       </tr>
     {% endfor %}
   </table>

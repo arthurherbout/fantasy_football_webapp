@@ -303,11 +303,49 @@ def league(lid):
         break
     lname_cursor.close()
 
-    context = dict(lname=lname)
+    user_cursor = g.conn.execute("SELECT username FROM participate WHERE lid = %s", lid)
+    users = []
+    for result in user_cursor:
+        users.append(result[0])
+    user_cursor.close()
+
+    
+
+    context = dict(users = users, lname=lname)
     return render_template("league.html", **context)
 
 
+def count_victories(lid, uid):
+    cursor = g.conn.execute("SELECT count(*) n_wins FROM ((SELECT p.fmid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_h = %s AND F.lid = %s AND p.hteamgoals > p.ateamgoals) UNION (SELECT p.fmdid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_a = %s AND F.lid = %s AND p.hteamgoals < p.ateamgoals)) as tmp", (uid, lid, uid, lid))
+    victories = 0
+    for result in cursor:
+        victories = result[0]
+        break
+    return victories
 
+def count_draws(lid, uid):
+    cursor = g.conn.execute("SELECT count(*) n_wins FROM ((SELECT p.fmid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_h = %s AND F.lid = %s AND p.hteamgoals = p.ateamgoals) UNION (SELECT p.fmdid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_a = %s AND F.lid = %s AND p.hteamgoals = p.ateamgoals)) as tmp", (uid, lid, uid, lid))
+    draws = 0
+    for result in cursor:
+        draws = result[0]
+        break
+    return draws
+
+def count_defeats(lid, uid):
+    cursor = g.conn.execute("SELECT count(*) n_wins FROM ((SELECT p.fmid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_h = %s AND F.lid = %s AND p.hteamgoals < p.ateamgoals) UNION (SELECT p.fmdid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_a = %s AND F.lid = %s AND p.hteamgoals > p.ateamgoals)) as tmp", (uid, lid, uid, lid))
+    defeats = 0
+    for result in cursor:
+        defeats = result[0]
+        break
+    return defeats
+
+def count_games(lid, uid):
+    cursor = g.conn.execute("SELECT count(*) n_wins FROM ((SELECT p.fmid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_h = %s AND F.lid = %s) UNION (SELECT p.fmdid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_a = %s AND f.lid =%s)) as tmp", (uid, lid, uid, lid))
+    games = 0
+    for result in cursor:
+        games = result[0]
+        break
+    return games
 
 @app.route('/rlmatches/')
 def rlmatches():
