@@ -238,16 +238,24 @@ def leagues():
     context = dict(data = leagues)
     return render_template("leaguesfile.html", **context)
 
-@app.route('/rlmatchdays/')
-def rlmatchdays():
-    cursor = g.conn.execute("SELECT rmdid FROM real_life_matchdays")
+@app.route('/rlmatches/')
+def rlmatches():
+    cursor = g.conn.execute("SELECT rmdid FROM real_life_matchday")
     rlmatchdays = []
     for result in cursor:
         rlmatchdays.append(result)
     cursor.close()
 
-    context = dict(data = rlmatchdays)
-    return render_template("rlmatchdaysfile.html", **context)
+    rlmatches = []
+    for i in range(len(rlmatchdays)):
+        rlmatches.append(rlmatchdays[i])
+        cursor = g.conn.execute("SELECT hteamgoals h,ateamgoals a FROM real_life_matchday WHERE rmdid = %s", rmdid)
+        for result in cursor:
+            rlmatches[i].append(result)
+        cursor.close()
+
+    context = dict(data = rlmatches)
+    return render_template("rlmatchesfile.html", **context)
 
 
 if __name__ == "__main__":
