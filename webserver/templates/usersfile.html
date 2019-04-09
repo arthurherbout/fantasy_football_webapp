@@ -1,0 +1,29 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>List of all registered users</h1>
+
+  <div>
+    {% for n in data %}
+    <div>
+      <a href="/players/">{{n}}</a></div>
+    {% endfor %}
+  </div>
+
+<p><a href="/another">Go to the other page</a></p>
+
+<form method="POST" action="/add">
+<p>Name of new user: <input type="text" name="name"> <input type="submit" value="Add"></p>
+</form>
+
+</body>
+
+
+</html>

@@ -46,13 +46,12 @@ engine = create_engine(DATABASEURI)
 
 
 # Here we create a test table and insert some values in it
-engine.execute("""DROP TABLE IF EXISTS test;""")
-engine.execute("""CREATE TABLE IF NOT EXISTS test (
-  id serial,
-  name text
-);""")
-engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
-
+#engine.execute("""DROP TABLE IF EXISTS test;""")
+#engine.execute("""CREATE TABLE IF NOT EXISTS test (
+#  id serial,
+#  name text
+#);""")
+#engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
 
 
 @app.before_request
@@ -112,10 +111,10 @@ def index():
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT name FROM test")
+  cursor = g.conn.execute("SELECT username FROM users")
   names = []
   for result in cursor:
-    names.append(result['name'])  # can also be accessed using result[0]
+    names.append(result['username'])  # can also be accessed using result[0]
   cursor.close()
 
   #
@@ -175,12 +174,35 @@ def add():
   g.conn.execute(text(cmd), name1 = name, name2 = name);
   return redirect('/')
 
+# users pages
+@app.route('/users')
+def users():
+    cursor = g.conn.execute("SELECT username FROM users")
+    users = []
+    for result in cursor:
+      users.append(result['username'])  # can also be accessed using result[0]
+    cursor.close()
+
+    context = dict(data = users)
+    return render_template("usersfile.html", **context)
+    
+
 
 @app.route('/login')
 def login():
-    abort(401)
-    this_is_never_executed()
+    return another()
+    #return render_template("anotherfile.html")
 
+@app.route('/players/')
+def players():
+    cursor = g.conn.execute("SELECT player.name, clubs.name FROM real_life_player_own as player, clubs WHERE player.cid = clubs.cid")
+    players = []
+    for result in cursor:
+        players.append(result)
+    cursor.close()
+
+    context = dict(data = players)
+    return render_template("playersfile.html", **context)
 
 if __name__ == "__main__":
   import click
