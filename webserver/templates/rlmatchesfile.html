@@ -13,13 +13,15 @@
     <h2>Matchday {{rmd[0]}}
     <table>
       <tr>
-        <th>Home Team Goals</th>
-        <th>Away Team Goals</th>
+        <th>Home Team</th>
+        <th>Score</th>
+        <th>Away Team</th>
       </tr>
-      {% for h,a in rmd[1] %}
+      {% for ht, hid, at, aid, hg, ag in rmd[1] %}
         <tr>
-          <td> {{h}} </td>
-          <td> {{a}} </td>
+          <td> <a href = '/clubs/{{hid}}'</a> {{ht}} </td>
+          <td> {{hg}} - {{ag}} </td>
+          <td> <a href = '/clubs/{{aid}}'</a>{{at}} </td>
         </tr>
       {% endfor %}
     </table>

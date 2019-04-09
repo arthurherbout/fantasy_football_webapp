@@ -14,12 +14,12 @@
       <th>Player</th>
       <th>Club</th>
     </tr>
-    {% for player, club in data %}
+    {% for player, pid, club, cid in data %}
       <tr>
         <td>
-          <a href = '/players/{{player}}'</a> {{player}} </td>
+          <a href = '/players/{{pid}}'</a> {{player}} </td>
         <td>
-          <a href = '/clubs/{{club}}' {{club}} </td>
+          <a href = '/clubs/{{cid}}'</a> {{club}} </td>
       </tr>
     {% endfor %}
   </table>

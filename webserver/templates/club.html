@@ -8,36 +8,33 @@
 
 
 <body>
-  <h1>Description of club {{club}}</h1>
+  <h1>Description of {{c_name}}</h1>
   <table>
     <tr>
       <th>Players</th>
       <th>Goals scored</th>
     </tr>
-    {% for players, ngoals in data1 %}
+    {% for player, ngoals in p_data %}
       <tr>
         <td> {{player}} </td>
-        <td> {{ngoals}}
+        <td> {{ngoals}} </td>
       </tr>
     {% endfor %}
   </table>
 
   <table>
     <tr>
-      <th> Home Team</th>
-      <th> Home Goals</th>
-      <th> Away Goals</th>
-      <th> Away Team</th>
+      <th>Home Team</th>
+      <th>Score</th>
+      <th>Away Team</th>
     </tr>
-    {% for hteam, hgoal, agoal, ateam in data2 %}
+    {% for ht, hid, at, aid, hg, ag in m_data %}
       <tr>
-        <td>
-          <a href = '/clubs/{{hteam}}'</a> {{hteam}}</td>
-        <td> {{hgoal}}</td>
-        <td> {{agoal}}</td>
-        <td>
-          <a href = 'clubs/{{ateam}}'</a>  {{ateam}}</td>
+        <td> <a href = '/clubs/{{hid}}'</a> {{ht}} </td>
+        <td> {{hg}} - {{ag}} </td>
+        <td> <a href = '/clubs/{{aid}}'</a>{{at}} </td>
       </tr>
+    {% endfor %}
   </table>
 
 </body>

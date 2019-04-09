@@ -195,7 +195,7 @@ def login():
 
 @app.route('/players/')
 def players():
-    cursor = g.conn.execute("SELECT player.name, clubs.name FROM real_life_player_own as player, clubs WHERE player.cid = clubs.cid")
+    cursor = g.conn.execute("SELECT player.name, player.pid, clubs.name, clubs.cid FROM real_life_player_own as player, clubs WHERE player.cid = clubs.cid")
     players = []
     for result in cursor:
         players.append(result)
@@ -204,15 +204,15 @@ def players():
     context = dict(data = players)
     return render_template("playersfile.html", **context)
 
-@app.route('/players/<name>')
-def player(name):
-    cursor = g.conn.execute("SELECT c.name, sum(score.ngoals) ngoals FROM real_life_player_own p JOIN score ON p.pid = score.pid JOIN clubs c ON p.cid=c.cid WHERE p.name=%s group by c.name", name)
+@app.route('/players/<pid>')
+def player(pid):
+    cursor = g.conn.execute("SELECT p.name, c.name, c.cid, sum(score.ngoals) FROM real_life_player_own p JOIN score ON p.pid = score.pid JOIN clubs c ON p.cid=c.cid WHERE p.pid=%s GROUP BY c.cid, p.pid", pid)
     data = []
     for result in cursor:
         data.append(result)
     cursor.close()
 
-    context = dict(data=data, player = name)
+    context = dict(data=data)
     return render_template("player.html", **context)
 
 @app.route('/clubs/')
@@ -225,6 +225,27 @@ def clubs():
 
     context = dict(data = clubs)
     return render_template("clubsfile.html", **context)
+
+@app.route('/clubs/<cid>')
+def club(cid):
+    cursor = g.conn.execute("SELECT p.name, sum(score.ngoals) FROM real_life_player_own p JOIN score ON p.pid = score.pid WHERE p.cid=%s GROUP BY p.pid", cid)
+    players = []
+    for result in cursor:
+        players.append(result)
+    cursor.close()
+
+    cursor2 = g.conn.execute("SELECT c1.name, c1.cid, c2.name, c2.cid, m.hteamgoals, m.ateamgoals FROM play_real_life_match m JOIN clubs c1 ON c1.cid = m.cid_h JOIN clubs c2 ON c2.cid = m.cid_a JOIN real_life_matchday rmd ON m.rmdid = rmd.rmdid WHERE (c1.cid = %s OR c2.cid = %s) ORDER BY m.rmdid", cid, cid)
+    matches = []
+    for result in cursor2:
+        matches.append(result)
+    cursor2.close()
+
+    cursor3 = g.conn.execute("SELECT name FROM clubs WHERE cid=%s", cid)
+    for result in cursor3:
+        c_name = result[0]
+
+    context = dict(p_data=players, m_data=matches, c_name=c_name)
+    return render_template("club.html", **context)
 
 
 @app.route('/leagues/')
@@ -249,7 +270,7 @@ def rlmatches():
     for i in range(len(rlmatchdays)):
         rlmatches.append([rlmatchdays[i][0]])
         rlmatches[i].append([])
-        cursor = g.conn.execute("SELECT hteamgoals h,ateamgoals a FROM play_real_life_match WHERE rmdid = %s", rlmatchdays[i][0])
+        cursor = g.conn.execute("SELECT c1.name, c1.cid, c2.name, c2.cid, m.hteamgoals, m.ateamgoals FROM play_real_life_match m JOIN clubs c1 ON c1.cid = m.cid_h JOIN clubs c2 ON c2.cid = m.cid_a  WHERE rmdid = %s", rlmatchdays[i][0])
         for result in cursor:
             rlmatches[i][1].append(result)
         cursor.close()

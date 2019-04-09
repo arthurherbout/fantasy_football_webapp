@@ -8,21 +8,20 @@
 
 
 <body>
-  <h1>Statistics of player {{player}}</h1>
-  <table>
-    <tr>
-      <th>Club</th>
-      <th>Goals scored</th>
-    </tr>
-    {% for club, ngoals in data %}
+  {% for player, club, cid, ngoals in data %}
+    <h1>Statistics of player {{player}}</h1>
+    <table>
+      <tr>
+        <th>Club</th>
+        <th>Goals scored</th>
+      </tr>
       <tr>
         <td>
-          <a href = '/clubs/{{club}}' </a> {{club}} </td>
+          <a href = '/clubs/{{cid}}' </a> {{club}} </td>
         <td> {{ngoals}}
       </tr>
-    {% endfor %}
-  </table>
-
+    </table>
+  {% endfor %}
 </body>
 
 
