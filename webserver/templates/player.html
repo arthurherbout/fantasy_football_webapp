@@ -8,17 +8,32 @@
 
 
 <body>
-  <h1>Statistics of player {{player}}</h1>
+  <h1>Statistics of player {{player}}:</h1>
   <table>
     <tr>
       <th>Club</th>
       <th>Goals scored</th>
     </tr>
-    {% for club, ngoals in data %}
+    {% for club, ngoals in data1 %}
       <tr>
         <td>
           <a href = '/clubs/{{club}}' </a> {{club}} </td>
-        <td> {{ngoals}}
+        <td> {{ngoals}} </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <h1> {{player}} has been drafted by: </h1>
+  <table>
+    <tr>
+      <th>username</th>
+      <th>league</th>
+    </tr>
+    {% for uid, league in data2 %}
+      <tr>
+        <td>
+          <a href = '/users/{{uid}}' </a> {{uid}} </td>
+        <td> {{league}} </td>
       </tr>
     {% endfor %}
   </table>
