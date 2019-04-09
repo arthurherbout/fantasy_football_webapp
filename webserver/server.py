@@ -205,6 +205,40 @@ def players():
     return render_template("playersfile.html", **context)
 
 
+@app.route('/clubs/')
+def clubs():
+    cursor = g.conn.execute("SELECT name FROM clubs")
+    clubs = []
+    for result in cursor:
+        clubs.append(result)
+    cursor.close()
+
+    context = dict(data = clubs)
+    return render_template("clubsfile.html", **context)
+
+
+@app.route('/leagues/')
+def leagues():
+    cursor = g.conn.execute("SELECT lname FROM leagues")
+    leagues = []
+    for result in cursor:
+        leagues.append(result)
+    cursor.close()
+
+    context = dict(data = leagues)
+    return render_template("leaguesfile.html", **context)
+
+@app.route('/rlmatchdays/')
+def rlmatchdays():
+    cursor = g.conn.execute("SELECT rmdid FROM real_life_matchdays")
+    rlmatchdays = []
+    for result in cursor:
+        rlmatchdays.append(result)
+    cursor.close()
+
+    context = dict(data = rlmatchdays)
+    return render_template("rlmatchdaysfile.html", **context)
+
 
 if __name__ == "__main__":
   import click

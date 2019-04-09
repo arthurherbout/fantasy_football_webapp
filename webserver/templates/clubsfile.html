@@ -1,0 +1,26 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>List of all clubs</h1>
+  <table>
+    <tr>
+      <th>Club</th>
+    </tr>
+    {% for club in data %}
+      <tr>
+        <td> {{club}} </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+</body>
+
+
+</html>

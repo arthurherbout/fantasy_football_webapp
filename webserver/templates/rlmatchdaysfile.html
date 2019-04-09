@@ -1,0 +1,26 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>List of all real-life matchdays</h1>
+  <table>
+    <tr>
+      <th>Real-life matchday ID</th>
+    </tr>
+    {% for rmd in data %}
+      <tr>
+        <td> {{rmd}} </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+</body>
+
+
+</html>

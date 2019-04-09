@@ -1,0 +1,26 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>List of all virtual leagues</h1>
+  <table>
+    <tr>
+      <th>Virtual League name</th>
+    </tr>
+    {% for league in data %}
+      <tr>
+        <td> {{league}} </td>
+      </tr>
+    {% endfor %}
+  </table>
+
+</body>
+
+
+</html>
