@@ -240,18 +240,18 @@ def leagues():
 
 @app.route('/rlmatches/')
 def rlmatches():
-    cursor = g.conn.execute("SELECT rmdid FROM real_life_matchday")
+    cursor = g.conn.execute("SELECT DISTINCT rmdid FROM play_real_life_match ORDER BY rmdid ASC")
     rlmatchdays = []
     for result in cursor:
         rlmatchdays.append(result)
     cursor.close()
-
     rlmatches = []
     for i in range(len(rlmatchdays)):
         rlmatches.append([rlmatchdays[i][0]])
+        rlmatches[i].append([])
         cursor = g.conn.execute("SELECT hteamgoals h,ateamgoals a FROM play_real_life_match WHERE rmdid = %s", rlmatchdays[i][0])
         for result in cursor:
-            rlmatches[i].append(result)
+            rlmatches[i][1].append(result)
         cursor.close()
 
     context = dict(data = rlmatches)
