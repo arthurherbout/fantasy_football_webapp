@@ -235,7 +235,7 @@ def player(pid):
         data.append(result)
     cursor.close()
 
-    cursor2 = g.conn.execute("SELECT d.username, l.lname from draft d join real_life_player_own r on d.pid = r.pid join leagues l on l.lid = d.lid where r.name =%s", name)
+    cursor2 = g.conn.execute("SELECT d.username, l.lname from draft d join real_life_player_own r on d.pid = r.pid join leagues l on l.lid = d.lid where r.pid =%s", pid)
     data2 = []
     for result in cursor2:
         data2.append(result)
