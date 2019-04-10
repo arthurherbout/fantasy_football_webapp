@@ -30,11 +30,11 @@
       <th>username</th>
       <th>league</th>
     </tr>
-    {% for uid, league in data2 %}
+    {% for uid, league, lid in data2 %}
       <tr>
         <td>
           <a href = '/users/{{uid}}' </a> {{uid}} </td>
-        <td> {{league}} </td>
+        <td> <a hred = '/leagues/{{lid}}' </a> {{league}} </td>
       </tr>
     {% endfor %}
   </table>

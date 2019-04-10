@@ -8,20 +8,22 @@
 
 
 <body>
-  <h1>Description of {{c_name}}</h1>
+  <h1>{{c_name}}</h1>
+  <h2>List of {{c_name}} players</h2>
   <table>
     <tr>
       <th>Players</th>
       <th>Goals scored</th>
     </tr>
-    {% for player, ngoals in p_data %}
+    {% for player, pid, ngoals in p_data %}
       <tr>
-        <td> {{player}} </td>
+        <td> <a href = '/players/{{pid}}'</a> {{player}} </td>
         <td> {{ngoals}} </td>
       </tr>
     {% endfor %}
   </table>
 
+  <h2>List of matches {{c_name}} took part in</h2>
   <table>
     <tr>
       <th>Home Team</th>
@@ -32,7 +34,7 @@
       <tr>
         <td> <a href = '/clubs/{{hid}}'</a> {{ht}} </td>
         <td> {{hg}} - {{ag}} </td>
-        <td> <a href = '/clubs/{{aid}}'</a>{{at}} </td>
+        <td> <a href = '/clubs/{{aid}}'</a> {{at}} </td>
       </tr>
     {% endfor %}
   </table>

@@ -225,7 +225,7 @@ def login():
 
 @app.route('/players/')
 def players():
-    cursor = g.conn.execute("SELECT p.name, s.pid, c.name, c.cid, count(s.pid) FROM real_life_player_own p JOIN score s ON p.pid = s.pid JOIN clubs c ON c.cid = p.cid GROUP BY (p.name, s.pid, c.name, c.cid) ORDER BY count DESC LIMIT 10");
+    cursor = g.conn.execute("SELECT p.name, s.pid, c.name, c.cid, sum(s.ngoals) goals FROM real_life_player_own p JOIN score s ON p.pid = s.pid JOIN clubs c ON c.cid = p.cid GROUP BY (p.name, s.pid, c.name, c.cid) ORDER BY goals DESC LIMIT 10");
     players = []
     for result in cursor:
         players.append(result)
@@ -248,7 +248,7 @@ def player(pid):
             break
         cursor.close()
 
-    cursor2 = g.conn.execute("SELECT d.username, l.lname from draft d join real_life_player_own r on d.pid = r.pid join leagues l on l.lid = d.lid where r.pid =%s", pid)
+    cursor2 = g.conn.execute("SELECT d.username, l.lname, l.lid from draft d join real_life_player_own r on d.pid = r.pid join leagues l on l.lid = d.lid where r.pid =%s", pid)
     data2 = []
     for result in cursor2:
         data2.append(result)
@@ -259,7 +259,7 @@ def player(pid):
 
 @app.route('/clubs/')
 def clubs():
-    cursor = g.conn.execute("SELECT name FROM clubs")
+    cursor = g.conn.execute("SELECT name, cid FROM clubs")
     clubs = []
     for result in cursor:
         clubs.append(result)
@@ -270,19 +270,19 @@ def clubs():
 
 @app.route('/clubs/<cid>')
 def club(cid):
-    cursor = g.conn.execute("SELECT p.name, sum(score.ngoals) FROM real_life_player_own p JOIN score ON p.pid = score.pid WHERE p.cid=%s GROUP BY p.pid", cid)
+    cursor = g.conn.execute("SELECT p.name, p.pid, sum(score.ngoals) goals FROM real_life_player_own p JOIN score ON p.pid = score.pid WHERE p.cid=%s GROUP BY p.pid ORDER BY goals desc", cid)
     players = []
-    name = []
+    ids = []
     for result in cursor:
         players.append(result)
-        name.append(result[0])
+        ids.append(result[1])
     cursor.close()
 
-    cursor1 = g.conn.execute("SELECT p.name from real_life_player_own p where p.cid=%s", cid)
+    cursor1 = g.conn.execute("SELECT p.name, p.pid, 0 from real_life_player_own p where p.cid=%s", cid)
     for result in cursor1:
-        if result[0] not in name:
-            name.append(result[0])
-            players.append([result[0], 0])
+        if result[1] not in ids:
+            ids.append(result[1])
+            players.append(result)
 
 
     cursor2 = g.conn.execute("SELECT c1.name, c1.cid, c2.name, c2.cid, m.hteamgoals, m.ateamgoals FROM play_real_life_match m JOIN clubs c1 ON c1.cid = m.cid_h JOIN clubs c2 ON c2.cid = m.cid_a JOIN real_life_matchday rmd ON m.rmdid = rmd.rmdid WHERE (c1.cid = %s OR c2.cid = %s) ORDER BY m.rmdid", cid, cid)
@@ -325,22 +325,20 @@ def league(lid):
     user_cursor = g.conn.execute("SELECT username FROM participate WHERE lid = %s", lid)
     users = []
     for result in user_cursor:
-        users.append(result[0])
+        users.append(result)
     user_cursor.close()
 
     for i in range(len(users)):
-        victories = count_victories(lid, users[i])
-        draws = count_draws(lid, users[i])
-        defeats = count_defeats(lid, users[i])
+        victories = count_victories(lid, users[i][0])
+        draws = count_draws(lid, users[i][0])
+        defeats = count_defeats(lid, users[i][0])
         points = 3 * victories + draws
 
+        print(users[i])
         users[i].append(victories)
         users[i].append(draws)
         users[i].append(defeats)
         users[i].append(points)
-
-
-
 
     context = dict(users = users, lname=lname)
     return render_template("league.html", **context)

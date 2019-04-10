@@ -13,7 +13,7 @@
     <tr>
       <th>Users</th>
     </tr>
-    {% for user in users %}
+    {% for user, v, dr, de, pts in users %}
       <tr>
         <td>
           <a href = '/users/{{user}}'</a> {{user}} </td>
