@@ -357,24 +357,7 @@ def league(lid):
     for result in user_cursor:
         users.append(result)
     user_cursor.close()
-
-<<<<<<< HEAD
-=======
-    print(users)
-
-    for i in range(len(users)):
-        victories = count_victories(lid, users[i][0])
-        draws = count_draws(lid, users[i][0])
-        defeats = count_defeats(lid, users[i][0])
-        points = 3 * victories + draws
-
-        print(type(users[i]))
-        users[i].append(victories)
-        users[i].append(draws)
-        users[i].append(defeats)
-        users[i].append(points)
-
->>>>>>> origin/master
+    
     context = dict(users = users, lname=lname)
     return render_template("league.html", **context)
 
