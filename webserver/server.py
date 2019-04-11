@@ -173,8 +173,23 @@ def add():
   g.conn.execute(text(cmd), name1 = name, name2 = name);
   return redirect('/')
 
-@app.route('/create_league/<uid>', methods=['POST'])
+@app.route('/join_league/<uid>', methods=['POST'])
 def join_league(uid):
+  league = request.form['league']
+
+  # need to know the lid of the knewly created league
+  cursor = g.conn.execute("SELECT lid from leagues where lname =%s", league)
+  for result in cursor:
+      lid = result[0]
+
+  # add to the participate table
+  cmd = 'INSERT INTO participate(lid,username) VALUES (:lid,:uid)'
+  g.conn.execute(text(cmd), lid=lid, uid=uid)
+
+  return redirect('/users/%s' %(uid))
+
+@app.route('/create_league/<uid>', methods=['POST'])
+def create_league(uid):
   league = request.form['league']
   cmd = 'INSERT INTO leagues(lname) VALUES (:league)';
   g.conn.execute(text(cmd), league= league);
@@ -286,6 +301,15 @@ def player(pid):
 
     context = dict(data=data, data2 = data2)
     return render_template("player.html", **context)
+
+@app.route('/get_player', methods=['POST'])
+def get_player():
+    name = request.form['name']
+
+    cursor = g.conn.execute("SELECT pid FROM real_life_player_own WHERE name=%s", name)
+    for result in cursor:
+        pid = result[0]
+    return player(pid)
 
 @app.route('/clubs/')
 def clubs():
