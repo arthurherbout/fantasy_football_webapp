@@ -9,7 +9,7 @@
 
 <body>
   {% for player, club, cid, ngoals in data %}
-    <h1>Statistics of player {{player}}</h1>
+    <h1>Statistics of {{player}}</h1>
     <table>
       <tr>
         <th>Club</th>
@@ -25,6 +25,10 @@
 
   <h1> {{player}} has been drafted by: </h1>
   {% endfor %}
+
+  {% if data2|length == 0%}
+  <div> No one yet ! </div>
+  {%else%}
   <table>
     <tr>
       <th>username</th>
@@ -38,6 +42,7 @@
       </tr>
     {% endfor %}
   </table>
+  {%endif%}
 </body>
 
 

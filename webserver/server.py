@@ -236,17 +236,11 @@ def players():
 
 @app.route('/players/<pid>')
 def player(pid):
-    p_cursor = g.conn.execute("SELECT p.name, c.name, c.cid, sum(score.ngoals) FROM real_life_player_own p JOIN score ON p.pid = score.pid JOIN clubs c ON p.cid=c.cid WHERE p.pid=%s GROUP BY c.cid, p.pid", pid)
+    p_cursor = g.conn.execute("SELECT p.name, c.name, c.cid, COALESCE(sum(score.ngoals), 0) FROM real_life_player_own p LEFT JOIN score ON p.pid = score.pid JOIN clubs c ON p.cid=c.cid WHERE p.pid=%s GROUP BY c.cid, p.pid", pid)
     data = []
     for result in p_cursor:
         data.append(result)
     p_cursor.close()
-    if data == []:
-        cursor = g.conn.execute("SELECT p.name, c.name, c.cid, 0 FROM real_life_player_own p JOIN clubs c ON p.cid = c.cid WHERE p.pid=%s", pid)
-        for result in cursor:
-            data.append(result)
-            break
-        cursor.close()
 
     cursor2 = g.conn.execute("SELECT d.username, l.lname, l.lid from draft d join real_life_player_own r on d.pid = r.pid join leagues l on l.lid = d.lid where r.pid =%s", pid)
     data2 = []
@@ -270,7 +264,7 @@ def clubs():
 
 @app.route('/clubs/<cid>')
 def club(cid):
-    cursor = g.conn.execute("SELECT p.name, p.pid, sum(score.ngoals) goals FROM real_life_player_own p JOIN score ON p.pid = score.pid WHERE p.cid=%s GROUP BY p.pid ORDER BY goals desc", cid)
+    cursor = g.conn.execute("SELECT p.name, p.pid, COALESCE(sum(score.ngoals), 0) goals FROM real_life_player_own p LEFT JOIN score ON p.pid = score.pid WHERE p.cid=%s GROUP BY p.pid ORDER BY goals desc", cid)
     players = []
     ids = []
     for result in cursor:
@@ -322,59 +316,14 @@ def league(lid):
         break
     lname_cursor.close()
 
-    user_cursor = g.conn.execute("SELECT username FROM participate WHERE lid = %s", lid)
+    user_cursor = g.conn.execute("WITH matches AS (SELECT * FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE f.lid = %s), wins AS(SELECT u.username, count(*) n_wins FROM users u, matches p  WHERE ((u.username = p.username_h AND p.hteamgoals > p.ateamgoals) OR (u.username = p.username_a AND p.hteamgoals < p.ateamgoals)) group by u.username), draws AS(SELECT u.username, count(*) n_draws FROM users u, matches p WHERE ((u.username = p.username_h AND p.hteamgoals = p.ateamgoals) OR (u.username = p.username_a AND p.hteamgoals = p.ateamgoals))group by u.username), losses AS (SELECT u.username, count (*) n_losses FROM users u, matches p WHERE((u.username = p.username_h AND p.hteamgoals < p.ateamgoals) OR(u.username = p.username_a AND p.hteamgoals > p.ateamgoals)) group by u.username), wdl AS(SELECT p.username usern, COALESCE(wins.n_wins,0) W, COALESCE(draws.n_draws, 0) D, COALESCE(losses.n_losses,0) L FROM participate p LEFT JOIN wins ON p.username = wins.username LEFT JOIN draws ON p.username = draws.username LEFT JOIN losses ON p.username = losses.username WHERE p.lid = %s), pts AS (SELECT usern, w, d, l, 3*w + d p FROM wdl) SELECT usern, w, d, l, p, RANK() OVER(ORDER BY p DESC) FROM pts;", lid, lid)
     users = []
     for result in user_cursor:
         users.append(result)
     user_cursor.close()
 
-    for i in range(len(users)):
-        victories = count_victories(lid, users[i][0])
-        draws = count_draws(lid, users[i][0])
-        defeats = count_defeats(lid, users[i][0])
-        points = 3 * victories + draws
-
-        print(users[i])
-        users[i].append(victories)
-        users[i].append(draws)
-        users[i].append(defeats)
-        users[i].append(points)
-
     context = dict(users = users, lname=lname)
     return render_template("league.html", **context)
-
-
-def count_victories(lid, uid):
-    cursor = g.conn.execute("SELECT count(*) n_wins FROM ((SELECT p.fmid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_h = %s AND F.lid = %s AND p.hteamgoals > p.ateamgoals) UNION (SELECT p.fmdid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_a = %s AND F.lid = %s AND p.hteamgoals < p.ateamgoals)) as tmp", (uid, lid, uid, lid))
-    victories = 0
-    for result in cursor:
-        victories = result[0]
-        break
-    return victories
-
-def count_draws(lid, uid):
-    cursor = g.conn.execute("SELECT count(*) n_wins FROM ((SELECT p.fmid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_h = %s AND F.lid = %s AND p.hteamgoals = p.ateamgoals) UNION (SELECT p.fmdid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_a = %s AND F.lid = %s AND p.hteamgoals = p.ateamgoals)) as tmp", (uid, lid, uid, lid))
-    draws = 0
-    for result in cursor:
-        draws = result[0]
-        break
-    return draws
-
-def count_defeats(lid, uid):
-    cursor = g.conn.execute("SELECT count(*) n_wins FROM ((SELECT p.fmid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_h = %s AND F.lid = %s AND p.hteamgoals < p.ateamgoals) UNION (SELECT p.fmdid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_a = %s AND F.lid = %s AND p.hteamgoals > p.ateamgoals)) as tmp", (uid, lid, uid, lid))
-    defeats = 0
-    for result in cursor:
-        defeats = result[0]
-        break
-    return defeats
-
-def count_games(lid, uid):
-    cursor = g.conn.execute("SELECT count(*) n_wins FROM ((SELECT p.fmid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_h = %s AND F.lid = %s) UNION (SELECT p.fmdid FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE p.username_a = %s AND f.lid =%s)) as tmp", (uid, lid, uid, lid))
-    games = 0
-    for result in cursor:
-        games = result[0]
-        break
-    return games
 
 @app.route('/rlmatches/')
 def rlmatches():

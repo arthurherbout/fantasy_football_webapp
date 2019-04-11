@@ -9,20 +9,25 @@
 
 <body>
   <h1>Homepage for user {{username}}</h1>
-  <table>
-    <tr>
-      <th>Leagues</th>
-      <th>Ranking</th>
-      <th>Roster</th>
-    </tr>
-    {% for league, lid in leagues %}
+  {%if leagues|length == 0%}
+  <div> {{username}} hasn't joined any league yet! </div>
+  {%else%}
+    <table>
       <tr>
-        <td>
-          <a href = '/leagues/{{lid}}'</a> {{league}} </td>
-        <td> Show Ranking </td>
-        <td>
-          <a href = '/rosters/{{lid}}/{{username}}'</a> See the roster</td>
+        <th>Leagues</th>
+        <th>Ranking</th>
+        <th>Roster</th>
       </tr>
-    {% endfor %}
+      {% for league, lid in leagues %}
+        <tr>
+          <td>
+            <a href = '/leagues/{{lid}}'</a> {{league}} </td>
+          <td> Show Ranking </td>
+          <td>
+            <a href = '/rosters/{{lid}}/{{username}}'</a> See the roster</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {%endif%}
 
 </body>

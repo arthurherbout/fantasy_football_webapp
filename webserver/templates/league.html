@@ -8,16 +8,33 @@
 
 
 <body>
-  <h1>Here are the participants in league {{lname}}</h1>
-  <table>
-    <tr>
-      <th>Users</th>
-    </tr>
-    {% for user, v, dr, de, pts in users %}
+  <h1>{{lname}}</h1>
+  {% if users|length == 0 %}
+    <div> There are no users in this league yet! </div>
+
+  {% else %}
+    <h2>Rankings for league {{lname}}</h2>
+    <table>
       <tr>
-        <td>
-          <a href = '/users/{{user}}'</a> {{user}} </td>
+        <th>Rank</th>
+        <th>Users</th>
+        <th>Wins</th>
+        <th>Draws</th>
+        <th>Defeats</th>
+        <th>Points</th>
       </tr>
-    {% endfor %}
+      {% for user, v, dr, de, pts, rank in users %}
+        <tr>
+          <td> {{rank}} </td>
+          <td>
+            <a href = '/users/{{user}}'</a> {{user}} </td>
+          <td> {{v}} </td>
+          <td> {{dr}} </td>
+          <td> {{de}} </td>
+          <td> {{pts}} </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
 
 </body>

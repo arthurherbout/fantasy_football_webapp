@@ -8,16 +8,21 @@
 
 
 <body>
-  <h1>Here is the roster for {{uid}} in league {{lname}}</h1>
-  <table>
-    <tr>
-      <th>Players</th>
-    </tr>
-    {% for player, pid in roster %}
+  <h1>Here is the roster for <a href = '/users/{{uid}}'</a> {{uid}} in league <a href = '/leagues/{{lid}}' </a> {{lname}}</h1>
+  {%if roser|length == 0 %}
+  <div> {{uid}} hasn't drafted anyone yet! </div>
+  {%else}
+    <table>
       <tr>
-        <td>
-          <a href = '/players/{{pid}}'</a> {{player}} </td>
+        <th>Players</th>
       </tr>
-    {% endfor %}
+      {% for player, pid in roster %}
+        <tr>
+          <td>
+            <a href = '/players/{{pid}}'</a> {{player}} </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {%endif%}
 
 </body>
