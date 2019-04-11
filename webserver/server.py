@@ -208,7 +208,7 @@ def draft(lid, uid):
     # add the player to the roster
     cmd = 'INSERT INTO draft(lid, username, pid) VALUES (:lid, :uid, :pid)'
     g.conn.execute(text(cmd), lid=lid, uid=uid, pid=pid)
-    return redirect('/rosters/%i/%s' %(lid,uid ))
+    return redirect('/rosters/%i/%s' %(lid,uid))
 
 # users pages
 @app.route('/users')
@@ -357,7 +357,7 @@ def league(lid):
     for result in user_cursor:
         users.append(result)
     user_cursor.close()
-    
+
     context = dict(users = users, lname=lname)
     return render_template("league.html", **context)
 
