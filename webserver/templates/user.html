@@ -24,5 +24,14 @@
           <a href = '/rosters/{{lid}}/{{username}}'</a> See the roster</td>
       </tr>
     {% endfor %}
+  </table>
+
+  <form method="POST" action="/join_league/{{username}}">
+  <p> Join an existing fantasy league: <input type="text" name="league"> <input type="submit" value="Add"></p>
+  </form>
+
+  <form method="POST" action="/create_league/{{username}}">
+  <p>Create a new fantasy league: <input type="text" name="league"> <input type="submit" value="Add"></p>
+  </form>
 
 </body>

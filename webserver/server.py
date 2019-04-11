@@ -105,7 +105,6 @@ def index():
   """
 
   # DEBUG: this is debugging code to see what request looks like
-  print request.args
 
 
   #
@@ -174,13 +173,50 @@ def add():
   g.conn.execute(text(cmd), name1 = name, name2 = name);
   return redirect('/')
 
+@app.route('/create_league/<uid>', methods=['POST'])
+def join_league(uid):
+  league = request.form['league']
+  cmd = 'INSERT INTO leagues(lname) VALUES (:league)';
+  g.conn.execute(text(cmd), league= league);
+
+  # need to know the lid of the knewly created league
+  cursor = g.conn.execute("SELECT lid from leagues where lname =%s", league)
+  for result in cursor:
+      lid = result[0]
+
+
+  # add to the participate table
+  cmd = 'INSERT INTO participate(lid,username) VALUES (:lid,:uid)'
+  g.conn.execute(text(cmd), lid=lid, uid=uid)
+
+  return redirect('/users/%s' %(uid))
+
+@app.route('/draft/<lid>/<uid>', methods=['POST'])
+def draft(lid, uid):
+    player = request.form['player']
+
+    # need to get back the pid of that player
+    cursor = g.conn.execute("SELECT pid FROM real_life_player_own WHERE name=%s", player)
+    for result in cursor:
+        pid = result[0]
+
+    # need to get back the lid of that league
+    cursor = g.conn.execute("SELECT lid FROM leagues WHERE lname=%s", lid)
+    for result in cursor:
+        lid = result[0]
+
+    # add the player to the roster
+    cmd = 'INSERT INTO draft(lid, username, pid) VALUES (:lid, :uid, :pid)'
+    g.conn.execute(text(cmd), lid=lid, uid=uid, pid=pid)
+    return redirect('/rosters/%i/%s' %(lid,uid ))
+
 # users pages
 @app.route('/users')
 def users():
     cursor = g.conn.execute("SELECT username FROM users")
     users = []
     for result in cursor:
-      users.append(result['username'])  # can also be accessed using result[0]
+      users.append(result['username'])
     cursor.close()
 
     context = dict(data = users)
@@ -328,13 +364,15 @@ def league(lid):
         users.append(result)
     user_cursor.close()
 
+    print(users)
+
     for i in range(len(users)):
         victories = count_victories(lid, users[i][0])
         draws = count_draws(lid, users[i][0])
         defeats = count_defeats(lid, users[i][0])
         points = 3 * victories + draws
 
-        print(users[i])
+        print(type(users[i]))
         users[i].append(victories)
         users[i].append(draws)
         users[i].append(defeats)

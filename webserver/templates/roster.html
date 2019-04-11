@@ -19,5 +19,10 @@
           <a href = '/players/{{pid}}'</a> {{player}} </td>
       </tr>
     {% endfor %}
+  </table>
+
+  <form method="POST" action="/draft/{{lname}}/{{uid}}">
+  <p> Pick a player for your squad: <input type="text" name="player"> <input type="submit" value="Pick"></p>
+  </form>
 
 </body>
