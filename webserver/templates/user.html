@@ -18,6 +18,7 @@
         <th>Ranking</th>
         <th>Roster</th>
       </tr>
+<<<<<<< HEAD
       {% for league, lid in leagues %}
         <tr>
           <td>
@@ -29,5 +30,17 @@
       {% endfor %}
     </table>
   {%endif%}
+=======
+    {% endfor %}
+  </table>
+
+  <form method="POST" action="/join_league/{{username}}">
+  <p> Join an existing fantasy league: <input type="text" name="league"> <input type="submit" value="Add"></p>
+  </form>
+
+  <form method="POST" action="/create_league/{{username}}">
+  <p>Create a new fantasy league: <input type="text" name="league"> <input type="submit" value="Add"></p>
+  </form>
+>>>>>>> origin/master
 
 </body>
