@@ -251,7 +251,7 @@ def roster(lid, uid):
         lname = result[0]
         break
     lname_cursor.close()
-    context = dict(roster = roster, uid = uid, lname = lname)
+    context = dict(roster = roster, uid = uid, lname = lname, lid = lid)
     return render_template("roster.html", **context)
 
 @app.route('/login')
@@ -358,8 +358,20 @@ def league(lid):
         users.append(result)
     user_cursor.close()
 
-    context = dict(users = users, lname=lname)
+    md_cursor = g.conn.execute("SELECT f.fmdid, c.rmdid FROM correspond_to c JOIN fantasy_matchdays f ON f.fmdid = c.fmdid WHERE f.lid = %s", lid)
+    matchdays = []
+    for result in md_cursor:
+        matchdays.append(result)
+    md_cursor.close()
+
+    context = dict(lid = lid, users = users, lname=lname, matchdays = matchdays)
     return render_template("league.html", **context)
+
+@app.route('/leagues/<lid>/<fmdid>')
+def fmd(lid, fmdid):
+    return(0)
+#### TODO
+
 
 @app.route('/rlmatches/')
 def rlmatches():
@@ -380,6 +392,8 @@ def rlmatches():
     context = dict(data = rlmatches)
     return render_template("rlmatchesfile.html", **context)
 
+## SQL request for getting a match result from a certain league, a certain matchday, and a certain couple of usernames
+# with sc as (select ngoals, pid from score s join correspond_to c on s.rmdid = c.rmdid where fmdid = 1), goals as(select d.username, coalesce(sum(s.ngoals),0) goals from draft d left join sc s on d.pid = s.pid where d.lid = 1 group by d.username) select g1.username, g1.goals, g2.goals, g2.username from goals g1, goals g2 where g1.username = 'Arnaud' and g2.username = 'Redouane';
 
 if __name__ == "__main__":
   import click

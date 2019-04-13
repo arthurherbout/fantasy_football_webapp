@@ -37,4 +37,22 @@
     </table>
   {% endif %}
 
+  {% if matchdays|length == 0%}
+    <div> There are no fantasy matchdays in this league yet! </div>
+
+  {%else%}
+    <h2> Fantasy matchdays for league {{lname}}</h2>
+    <table>
+      <tr><th>Matchday number<th>
+          <th>Corresponding real-life matchday<th></tr>
+      {% for fmdid, rmdid in matchdays %}
+        <tr>
+          <td> <a href = '/leagues/{{lid}}/{{fmdid}}' </a> {{fmdid}} </td>
+          <td> <a href = '/rlmatches/#{{rmdid}}' </a> {{rmdid}} </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+
+<!--- TODO: ADD BUTTON TO CREATE MATCHDAY ---> 
 </body>
