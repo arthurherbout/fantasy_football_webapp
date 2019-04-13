@@ -173,8 +173,23 @@ def add():
   g.conn.execute(text(cmd), name1 = name, name2 = name);
   return redirect('/')
 
-@app.route('/create_league/<uid>', methods=['POST'])
+@app.route('/join_league/<uid>', methods=['POST'])
 def join_league(uid):
+  league = request.form['league']
+
+  # need to know the lid of the knewly created league
+  cursor = g.conn.execute("SELECT lid from leagues where lname =%s", league)
+  for result in cursor:
+      lid = result[0]
+
+  # add to the participate table
+  cmd = 'INSERT INTO participate(lid,username) VALUES (:lid,:uid)'
+  g.conn.execute(text(cmd), lid=lid, uid=uid)
+
+  return redirect('/users/%s' %(uid))
+
+@app.route('/create_league/<uid>', methods=['POST'])
+def create_league(uid):
   league = request.form['league']
   cmd = 'INSERT INTO leagues(lname) VALUES (:league)';
   g.conn.execute(text(cmd), league= league);
@@ -287,6 +302,15 @@ def player(pid):
     context = dict(data=data, data2 = data2)
     return render_template("player.html", **context)
 
+@app.route('/get_player', methods=['POST'])
+def get_player():
+    name = request.form['name']
+
+    cursor = g.conn.execute("SELECT pid FROM real_life_player_own WHERE name=%s", name)
+    for result in cursor:
+        pid = result[0]
+    return player(pid)
+
 @app.route('/clubs/')
 def clubs():
     cursor = g.conn.execute("SELECT name, cid FROM clubs")
@@ -352,7 +376,12 @@ def league(lid):
         break
     lname_cursor.close()
 
-    user_cursor = g.conn.execute("WITH matches AS (SELECT * FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE f.lid = %s), wins AS(SELECT u.username, count(*) n_wins FROM users u, matches p  WHERE ((u.username = p.username_h AND p.hteamgoals > p.ateamgoals) OR (u.username = p.username_a AND p.hteamgoals < p.ateamgoals)) group by u.username), draws AS(SELECT u.username, count(*) n_draws FROM users u, matches p WHERE ((u.username = p.username_h AND p.hteamgoals = p.ateamgoals) OR (u.username = p.username_a AND p.hteamgoals = p.ateamgoals))group by u.username), losses AS (SELECT u.username, count (*) n_losses FROM users u, matches p WHERE((u.username = p.username_h AND p.hteamgoals < p.ateamgoals) OR(u.username = p.username_a AND p.hteamgoals > p.ateamgoals)) group by u.username), wdl AS(SELECT p.username usern, COALESCE(wins.n_wins,0) W, COALESCE(draws.n_draws, 0) D, COALESCE(losses.n_losses,0) L FROM participate p LEFT JOIN wins ON p.username = wins.username LEFT JOIN draws ON p.username = draws.username LEFT JOIN losses ON p.username = losses.username WHERE p.lid = %s), pts AS (SELECT usern, w, d, l, 3*w + d p FROM wdl) SELECT usern, w, d, l, p, RANK() OVER(ORDER BY p DESC) FROM pts;", lid, lid)
+    user_cursor = g.conn.execute("""WITH matches AS (SELECT * FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE f.lid = %s),
+     wins AS(SELECT u.username, count(*) n_wins FROM users u, matches p  WHERE ((u.username = p.username_h AND p.hteamgoals > p.ateamgoals) OR (u.username = p.username_a AND p.hteamgoals < p.ateamgoals)) group by u.username),
+     draws AS(SELECT u.username, count(*) n_draws FROM users u, matches p WHERE ((u.username = p.username_h AND p.hteamgoals = p.ateamgoals) OR (u.username = p.username_a AND p.hteamgoals = p.ateamgoals))group by u.username),
+     losses AS (SELECT u.username, count (*) n_losses FROM users u, matches p WHERE((u.username = p.username_h AND p.hteamgoals < p.ateamgoals) OR(u.username = p.username_a AND p.hteamgoals > p.ateamgoals)) group by u.username),
+     wdl AS(SELECT p.username usern, COALESCE(wins.n_wins,0) W, COALESCE(draws.n_draws, 0) D, COALESCE(losses.n_losses,0) L FROM participate p LEFT JOIN wins ON p.username = wins.username LEFT JOIN draws ON p.username = draws.username LEFT JOIN losses ON p.username = losses.username WHERE p.lid = %s),
+     pts AS (SELECT usern, w, d, l, 3*w + d p FROM wdl) SELECT usern, w, d, l, p, RANK() OVER(ORDER BY p DESC) FROM pts;""", lid, lid)
     users = []
     for result in user_cursor:
         users.append(result)
