@@ -404,8 +404,27 @@ def league(lid):
 
 @app.route('/leagues/<lid>/<fmdid>')
 def fmd(lid, fmdid):
-    return(0)
+    return render_template("fmatchday.html")
 #### TODO
+
+@app.route('/create_fm/<lid>', methods=['POST'])
+def create_fm(lid):
+    rmdid = request.form['rmdid']
+
+    # add a fantasy matchday in the fantasy matchday table
+    g.conn.execute("""INSERT INTO fantasy_matchdays(lid) VALUES (%s)""", lid);
+
+    # get back the fmdid of the newly created fantasy_matchday
+    # by construction it is the max of fmdid
+    cursor = g.conn.execute(""" SELECT MAX(fmdid) from fantasy_matchdays""")
+    fmdid = 0
+    for result in cursor:
+        fmdid = result[0]
+
+    # now we add the fmdid, rmdid into the correspond_to table.
+    g.conn.execute("""INSERT INTO correspond_to(fmdid, rmdid) VALUES (%s, %s)""", fmdid, rmdid)
+
+    return redirect('/leagues/%s/%s' %(lid, fmdid))
 
 
 @app.route('/rlmatches/')

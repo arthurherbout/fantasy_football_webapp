@@ -1,0 +1,36 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>List of all fantasy matches in league {{lname}} for matchday {{fmd}}</h1>
+  {% for rmd in data %}
+    <a id={{rmd[0]}}>
+      <h2>Matchday {{rmd[0]}} </h2>
+      <table>
+        <tr>
+          <th>Home Team</th>
+          <th>Score</th>
+          <th>Away Team</th>
+        </tr>
+        {% for ht, hid, at, aid, hg, ag in rmd[1] %}
+          <tr>
+            <td> <a href = '/clubs/{{hid}}'</a> {{ht}} </td>
+            <td> {{hg}} - {{ag}} </td>
+            <td> <a href = '/clubs/{{aid}}'</a>{{at}} </td>
+          </tr>
+        {% endfor %}
+      </table>
+    </a>
+  {% endfor %}
+
+
+</body>
+
+
+</html>
