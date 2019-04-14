@@ -158,11 +158,6 @@ def index():
 #
 # notice that the functio name is another() rather than index()
 # the functions for each app.route needs to have different names
-#
-@app.route('/another')
-def another():
-  return render_template("anotherfile.html")
-
 
 # Example of adding new data to the database
 @app.route('/add', methods=['POST'])
@@ -250,6 +245,17 @@ def user(uid):
 
     context = dict(leagues= leagues, username = uid)
     return render_template("user.html", **context)
+
+# create user
+@app.route('/users/create_user', methods=['POST'])
+def create_user():
+    username = request.form['user']
+
+    # add to the user table
+    cmd = 'INSERT INTO users(username) VALUES (:username)'
+    g.conn.execute(text(cmd), username=username)
+
+    return redirect('/users/%s' %(username))
 
 # roster page
 @app.route('/rosters/<lid>/<uid>')
@@ -393,7 +399,13 @@ def league(lid):
         matchdays.append(result)
     md_cursor.close()
 
-    context = dict(lid = lid, users = users, lname=lname, matchdays = matchdays)
+    rlmd_cursor = g.conn.execute("SELECT * FROM real_life_matchday")
+    rlmatchdays = []
+    for result in rlmd_cursor:
+        rlmatchdays.append(result)
+    rlmd_cursor.close()
+
+    context = dict(lid = lid, users = users, lname=lname, matchdays = matchdays, rlmatchdays = rlmatchdays)
     return render_template("league.html", **context)
 
 @app.route('/leagues/<lid>/<fmdid>')
@@ -413,6 +425,25 @@ def fmd(lid, fmdid):
 
     context = dict(matches = matches, lid = lid, lname = lname, fmdid = fmdid)
     return render_template("fantasymatchday.html", **context)
+
+@app.route('/create_fm/<lid>', methods=['POST'])
+def create_fm(lid):
+    rmdid = request.form['rmdid']
+
+    # add a fantasy matchday in the fantasy matchday table
+    g.conn.execute("""INSERT INTO fantasy_matchdays(lid) VALUES (%s)""", lid);
+
+    # get back the fmdid of the newly created fantasy_matchday
+    # by construction it is the max of fmdid
+    cursor = g.conn.execute(""" SELECT MAX(fmdid) from fantasy_matchdays""")
+    fmdid = 0
+    for result in cursor:
+        fmdid = result[0]
+
+    # now we add the fmdid, rmdid into the correspond_to table.
+    g.conn.execute("""INSERT INTO correspond_to(fmdid, rmdid) VALUES (%s, %s)""", fmdid, rmdid)
+
+    return redirect('/leagues/%s/%s' %(lid, fmdid))
 
 
 @app.route('/rlmatches/')

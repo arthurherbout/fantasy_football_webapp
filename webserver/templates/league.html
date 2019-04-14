@@ -54,5 +54,13 @@
     </table>
   {% endif %}
 
-<!--- TODO: ADD BUTTON TO CREATE MATCHDAY ---> 
+  <h3> Create a fantasy matchday based on a real-life matchday </h3>
+  <form method = "POST" action="/create_fm/{{lid}}">
+  <select name="rmdid">
+    {% for rmdid in rlmatchdays %}
+      <option value="{{rmdid[0]}}">Matchday {{rmdid[0]}}</option>
+    {%endfor%}
+  </select>
+  <input type="submit" value="Create Fantasy Matchday">
+</form>
 </body>
