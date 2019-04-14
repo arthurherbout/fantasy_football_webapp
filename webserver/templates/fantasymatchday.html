@@ -1,0 +1,34 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <h1>List of matches in matchday {{fmdid}} for league <a href = '/leagues/{{lid}}' {{lname}} </a> </h1>
+    {% if matches|length == 0 %}
+      <div> There are no matches in this matchday yet! </div>
+    {% else %}
+      <table>
+        <tr>
+          <th>Home Team</th>
+          <th>Score</th>
+          <th>Away Team</th>
+        </tr>
+        {% for uh, gh, ga, ua in matches %}
+          <tr>
+            <td> <a href = '/users/{{uh}}'</a> {{uh}} </td>
+            <td> {{gh}} - {{ga}} </td>
+            <td> <a href = '/users/{{ua}}'</a>{{ua}} </td>
+          </tr>
+        {% endfor %}
+        </table>
+      {% endif %}
+
+</body>
+
+
+</html>

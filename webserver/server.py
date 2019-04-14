@@ -398,8 +398,21 @@ def league(lid):
 
 @app.route('/leagues/<lid>/<fmdid>')
 def fmd(lid, fmdid):
-    return(0)
-#### TODO
+    matches_cursor = g.conn.execute("SELECT p.username_h, p.hteamgoals, p.ateamgoals, p.username_a FROM play_fantasy_match p JOIN fantasy_matchdays f ON f.fmdid = p.fmdid WHERE p.fmdid = %s AND f.lid = %s", fmdid, lid)
+    matches = []
+    for result in matches_cursor:
+        matches.append(result)
+    matches_cursor.close()
+
+    lname_cursor = g.conn.execute("SELECT DISTINCT lname FROM leagues WHERE lid = %s", lid)
+    lname = 0
+    for result in lname_cursor:
+        lname = result[0]
+        break
+    lname_cursor.close()
+
+    context = dict(matches = matches, lid = lid, lname = lname, fmdid = fmdid)
+    return render_template("fantasymatchday.html", **context)
 
 
 @app.route('/rlmatches/')
