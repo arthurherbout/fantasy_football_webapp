@@ -158,11 +158,6 @@ def index():
 #
 # notice that the functio name is another() rather than index()
 # the functions for each app.route needs to have different names
-#
-@app.route('/another')
-def another():
-  return render_template("anotherfile.html")
-
 
 # Example of adding new data to the database
 @app.route('/add', methods=['POST'])
@@ -250,6 +245,17 @@ def user(uid):
 
     context = dict(leagues= leagues, username = uid)
     return render_template("user.html", **context)
+
+# create user
+@app.route('/users/create_user', methods=['POST'])
+def create_user():
+    username = request.form['user']
+
+    # add to the user table
+    cmd = 'INSERT INTO users(username) VALUES (:username)'
+    g.conn.execute(text(cmd), username=username)
+
+    return redirect('/users/%s' %(username))
 
 # roster page
 @app.route('/rosters/<lid>/<uid>')
