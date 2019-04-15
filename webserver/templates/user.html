@@ -9,7 +9,7 @@
 
 <body>
   <h1>Homepage for user {{username}}</h1>
-  {%if leagues|length == 0%}
+  {%if results|length == 0%}
   <div> {{username}} hasn't joined any league yet! </div>
   {%else%}
     <table>
@@ -18,11 +18,11 @@
         <th>Ranking</th>
         <th>Roster</th>
       </tr>
-      {% for league, lid in leagues %}
+      {% for league, lid,ranking in results %}
         <tr>
           <td>
             <a href = '/leagues/{{lid}}'</a> {{league}} </td>
-          <td> Show Ranking </td>
+          <td> {{ranking}} </td>
           <td>
             <a href = '/rosters/{{lid}}/{{username}}'</a> See the roster</td>
         </tr>

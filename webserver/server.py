@@ -240,10 +240,30 @@ def user(uid):
     for result in league_cursor:
         leagues.append(result)
     league_cursor.close()
-    #for league in leagues:
+
+    # get back the ranking in each league
+    results = []
+    for i in range(len(leagues)):
+        lid = leagues[i][1]
+        league = leagues[i]
+        print(lid)
+        print(league)
+        ranking_cursor = g.conn.execute("""WITH matches AS (SELECT * FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE f.lid = %s),
+         wins AS(SELECT u.username, count(*) n_wins FROM users u, matches p  WHERE ((u.username = p.username_h AND p.hteamgoals > p.ateamgoals) OR (u.username = p.username_a AND p.hteamgoals < p.ateamgoals)) group by u.username),
+         draws AS(SELECT u.username, count(*) n_draws FROM users u, matches p WHERE ((u.username = p.username_h AND p.hteamgoals = p.ateamgoals) OR (u.username = p.username_a AND p.hteamgoals = p.ateamgoals))group by u.username),
+         losses AS (SELECT u.username, count (*) n_losses FROM users u, matches p WHERE((u.username = p.username_h AND p.hteamgoals < p.ateamgoals) OR(u.username = p.username_a AND p.hteamgoals > p.ateamgoals)) group by u.username),
+         wdl AS(SELECT p.username usern, COALESCE(wins.n_wins,0) W, COALESCE(draws.n_draws, 0) D, COALESCE(losses.n_losses,0) L FROM participate p LEFT JOIN wins ON p.username = wins.username LEFT JOIN draws ON p.username = draws.username LEFT JOIN losses ON p.username = losses.username WHERE p.lid = %s),
+         pts AS (SELECT usern, w, d, l, 3*w + d p FROM wdl) SELECT usern, w, d, l, p, RANK() OVER(ORDER BY p DESC) FROM pts;""", lid, lid)
+        for result in ranking_cursor:
+            if result[0] == uid:
+                temp = [league[0]]
+                temp.append(lid)
+                temp.append(result[5])
+                print(temp)
+                results.append(temp)
 
 
-    context = dict(leagues= leagues, username = uid)
+    context = dict(results= results, username = uid)
     return render_template("user.html", **context)
 
 # create user
