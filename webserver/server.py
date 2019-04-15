@@ -13,6 +13,7 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
+from sqlalchemy.exc import IntegrityError
 from flask import Flask, request, render_template, g, redirect, Response
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
@@ -216,8 +217,11 @@ def draft(lid, uid):
         lid = result[0]
 
     # add the player to the roster
-    cmd = 'INSERT INTO draft(lid, username, pid) VALUES (:lid, :uid, :pid)'
-    g.conn.execute(text(cmd), lid=lid, uid=uid, pid=pid)
+    try:
+        cmd = 'INSERT INTO draft(lid, username, pid) VALUES (:lid, :uid, :pid)'
+        g.conn.execute(text(cmd), lid=lid, uid=uid, pid=pid)
+    except IntegrityError:
+        pass
     return redirect('/rosters/%i/%s' %(lid,uid))
 
 # users pages
@@ -259,7 +263,6 @@ def user(uid):
                 temp.append(lid)
                 for r in loc:
                     temp.append(r)
-                print(temp)
                 results.append(temp)
 
 
