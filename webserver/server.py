@@ -246,8 +246,6 @@ def user(uid):
     for i in range(len(leagues)):
         lid = leagues[i][1]
         league = leagues[i]
-        print(lid)
-        print(league)
         ranking_cursor = g.conn.execute("""WITH matches AS (SELECT * FROM play_fantasy_match p JOIN fantasy_matchdays f ON p.fmdid = f.fmdid WHERE f.lid = %s),
          wins AS(SELECT u.username, count(*) n_wins FROM users u, matches p  WHERE ((u.username = p.username_h AND p.hteamgoals > p.ateamgoals) OR (u.username = p.username_a AND p.hteamgoals < p.ateamgoals)) group by u.username),
          draws AS(SELECT u.username, count(*) n_draws FROM users u, matches p WHERE ((u.username = p.username_h AND p.hteamgoals = p.ateamgoals) OR (u.username = p.username_a AND p.hteamgoals = p.ateamgoals))group by u.username),
@@ -256,9 +254,11 @@ def user(uid):
          pts AS (SELECT usern, w, d, l, 3*w + d p FROM wdl) SELECT usern, w, d, l, p, RANK() OVER(ORDER BY p DESC) FROM pts;""", lid, lid)
         for result in ranking_cursor:
             if result[0] == uid:
+                loc = result
                 temp = [league[0]]
                 temp.append(lid)
-                temp.append(result[5])
+                for r in loc:
+                    temp.append(r)
                 print(temp)
                 results.append(temp)
 

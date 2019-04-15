@@ -16,13 +16,21 @@
       <tr>
         <th>Leagues</th>
         <th>Ranking</th>
+        <th>Wins</th>
+        <th>Draws</th>
+        <th>Defeats</th>
+        <th>Points</th>
         <th>Roster</th>
       </tr>
-      {% for league, lid,ranking in results %}
+      {% for league, lid, u, w, d, l, p,ranking in results %}
         <tr>
           <td>
             <a href = '/leagues/{{lid}}'</a> {{league}} </td>
           <td> {{ranking}} </td>
+          <td> {{w}} </td>
+          <td> {{d}} </td>
+          <td> {{l}} </td>
+          <td> {{p}} </td>
           <td>
             <a href = '/rosters/{{lid}}/{{username}}'</a> See the roster</td>
         </tr>
