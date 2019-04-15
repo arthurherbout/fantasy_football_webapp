@@ -220,9 +220,11 @@ def draft(lid, uid):
     try:
         cmd = 'INSERT INTO draft(lid, username, pid) VALUES (:lid, :uid, :pid)'
         g.conn.execute(text(cmd), lid=lid, uid=uid, pid=pid)
+        return roster(lid, uid)
+        #redirect('/rosters/%i/%s' %(lid,uid))
     except IntegrityError:
-        pass
-    return redirect('/rosters/%i/%s' %(lid,uid))
+        return roster(lid, uid, player)
+        return redirect('/rosters/%i/%s' %(lid,uid))
 
 # users pages
 @app.route('/users')
@@ -282,7 +284,7 @@ def create_user():
 
 # roster page
 @app.route('/rosters/<lid>/<uid>')
-def roster(lid, uid):
+def roster(lid, uid, player = None):
     roster_cursor = g.conn.execute("SELECT p.name, p.pid FROM real_life_player_own p JOIN draft d ON d.pid = p.pid WHERE d.username = %s AND d.lid= %s", (uid, lid))
     roster = []
     for result in roster_cursor:
@@ -295,7 +297,7 @@ def roster(lid, uid):
         lname = result[0]
         break
     lname_cursor.close()
-    context = dict(roster = roster, uid = uid, lname = lname, lid = lid)
+    context = dict(roster = roster, uid = uid, lname = lname, lid = lid, player = player)
     return render_template("roster.html", **context)
 
 @app.route('/login')

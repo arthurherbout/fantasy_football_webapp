@@ -25,6 +25,11 @@
     </table>
   {%endif%}
 
+  {%if player != None %}
+<h5> The player {{player}} has already been drafted in the league {{lname}}</h5>
+  {%endif%}
+
+
   <form method="POST" action="/draft/{{lname}}/{{uid}}">
   <p> Pick a player for your squad: <input type="text" name="player"> <input type="submit" value="Pick"></p>
   </form>
