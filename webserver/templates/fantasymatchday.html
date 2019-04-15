@@ -28,6 +28,23 @@
         </table>
       {% endif %}
 
+      <h3> Create a new match in matchday {{fmdid}} </h3>
+        <form method = "POST" action="/create_fmatch/{{lid}}/{{fmdid}}">
+        Home user:
+        <select name="username_h">
+          {% for username in users %}
+            <option value="{{username}}">{{username}}</option>
+          {%endfor%}
+        </select>
+        Away user: 
+        <select name="username_a">
+          {% for username in users %}
+            <option value="{{username}}">{{username}}</option>
+          {%endfor%}
+        </select>
+        <input type="submit" value="Create Fantasy Match">
+      </form>
+
 </body>
 
 

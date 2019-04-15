@@ -58,7 +58,7 @@
   <form method = "POST" action="/create_fm/{{lid}}">
   <select name="rmdid">
     {% for rmdid in rlmatchdays %}
-      <option value="{{rmdid[0]}}">Matchday {{rmdid[0]}}</option>
+      <option value="{{rmdid}}">Matchday {{rmdid}}</option>
     {%endfor%}
   </select>
   <input type="submit" value="Create Fantasy Matchday">

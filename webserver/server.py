@@ -402,7 +402,7 @@ def league(lid):
     rlmd_cursor = g.conn.execute("SELECT * FROM real_life_matchday")
     rlmatchdays = []
     for result in rlmd_cursor:
-        rlmatchdays.append(result)
+        rlmatchdays.append(result[0])
     rlmd_cursor.close()
 
     context = dict(lid = lid, users = users, lname=lname, matchdays = matchdays, rlmatchdays = rlmatchdays)
@@ -423,7 +423,13 @@ def fmd(lid, fmdid):
         break
     lname_cursor.close()
 
-    context = dict(matches = matches, lid = lid, lname = lname, fmdid = fmdid)
+    users_cursor = g.conn.execute("SELECT username FROM participate WHERE lid = %s", lid)
+    users = []
+    for result in users_cursor:
+        users.append(result[0])
+    users_cursor.close()
+
+    context = dict(matches = matches, lid = lid, lname = lname, fmdid = fmdid, users = users)
     return render_template("fantasymatchday.html", **context)
 
 @app.route('/create_fm/<lid>', methods=['POST'])
@@ -439,9 +445,40 @@ def create_fm(lid):
     fmdid = 0
     for result in cursor:
         fmdid = result[0]
-
+        break
+    cursor.close()
     # now we add the fmdid, rmdid into the correspond_to table.
     g.conn.execute("""INSERT INTO correspond_to(fmdid, rmdid) VALUES (%s, %s)""", fmdid, rmdid)
+
+    return redirect('/leagues/%s/%s' %(lid, fmdid))
+
+@app.route('/create_fmatch/<lid>/<fmdid>', methods=['POST'])
+def create_fmatch(lid, fmdid):
+    username_h = request.form['username_h']
+    username_a = request.form['username_a']
+
+    # first, get the score for the game, using the real-life scorers
+    score_cursor = g.conn.execute("""WITH sc AS (SELECT ngoals, pid
+                                                 FROM score s JOIN correspond_to c ON s.rmdid = c.rmdid
+                                                 WHERE fmdid = %s),
+                                          goals AS (SELECT d.username, COALESCE(SUM(s.ngoals),0) goals
+                                                    FROM draft d LEFT JOIN sc s ON d.pid = s.pid
+                                                    WHERE d.lid = %s GROUP BY d.username)
+                                     SELECT g1.goals, g2.goals
+                                     FROM goals g1, goals g2
+                                     WHERE g1.username = %s and g2.username = %s;""",
+                                  fmdid, lid, username_h, username_a)
+
+    for result in score_cursor:
+        ngoals_h = result[0]
+        ngoals_a = result[1]
+        break
+    score_cursor.close()
+
+    # add a fantasy match in the fantasy match table
+    g.conn.execute("""INSERT INTO play_fantasy_match(username_h, username_a, hteamgoals, ateamgoals, fmdid)
+                      VALUES (%s, %s, %s, %s, %s)""", username_h, username_a, ngoals_h, ngoals_a, fmdid);
+
 
     return redirect('/leagues/%s/%s' %(lid, fmdid))
 
