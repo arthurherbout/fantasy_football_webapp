@@ -28,11 +28,13 @@
         </table>
       {% endif %}
 
+
+      <h3> Create a new match in matchday {{fmdid}} </h3>
+
       {% if suerror == 1 %}
         <div> You can't play against yourself! </div>
       {% endif %}
       
-      <h3> Create a new match in matchday {{fmdid}} </h3>
         <form method = "POST" action="/create_fmatch/{{lid}}/{{fmdid}}">
         Home user:
         <select name="username_h">
