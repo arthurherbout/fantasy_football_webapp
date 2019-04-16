@@ -173,16 +173,18 @@ def add():
 def join_league(uid):
   league = request.form['league']
 
-  # need to know the lid of the knewly created league
+  # need to know the lid of the league
   cursor = g.conn.execute("SELECT lid from leagues where lname =%s", league)
   for result in cursor:
       lid = result[0]
 
   # add to the participate table
-  cmd = 'INSERT INTO participate(lid,username) VALUES (:lid,:uid)'
-  g.conn.execute(text(cmd), lid=lid, uid=uid)
-
-  return redirect('/users/%s' %(uid))
+  try:
+      cmd = 'INSERT INTO participate(lid,username) VALUES (:lid,:uid)'
+      g.conn.execute(text(cmd), lid=lid, uid=uid)
+      return redirect('/users/%s' %(uid))
+  except IntegrityError:
+      return redirect('/users/%s_' %(uid))
 
 @app.route('/create_league/<uid>', methods=['POST'])
 def create_league(uid):
@@ -190,7 +192,7 @@ def create_league(uid):
   cmd = 'INSERT INTO leagues(lname) VALUES (:league)';
   g.conn.execute(text(cmd), league= league);
 
-  # need to know the lid of the knewly created league
+  # need to know the lid of the newly created league
   cursor = g.conn.execute("SELECT lid from leagues where lname =%s", league)
   for result in cursor:
       lid = result[0]
@@ -221,26 +223,31 @@ def draft(lid, uid):
         cmd = 'INSERT INTO draft(lid, username, pid) VALUES (:lid, :uid, :pid)'
         g.conn.execute(text(cmd), lid=lid, uid=uid, pid=pid)
         return roster(lid, uid)
-        #redirect('/rosters/%i/%s' %(lid,uid))
+
     except IntegrityError:
         return roster(lid, uid, player)
-        return redirect('/rosters/%i/%s' %(lid,uid))
 
 # users pages
 @app.route('/users')
-def users():
+def users(cuerror=0):
     cursor = g.conn.execute("SELECT username FROM users")
     users = []
     for result in cursor:
       users.append(result['username'])
     cursor.close()
 
-    context = dict(data = users)
+    context = dict(data = users, cuerror = cuerror)
     return render_template("usersfile.html", **context)
 
 # user page
 @app.route('/users/<uid>')
 def user(uid):
+    lerror = 0
+
+    # if we have to display the "has already joined league" error
+    if uid[-1] == '_':
+        lerror = 1
+        uid = uid[:-1]
     league_cursor = g.conn.execute("SELECT l.lname, l.lid FROM leagues l JOIN participate p ON l.lid = p.lid where username = %s ", uid)
     leagues = []
     for result in league_cursor:
@@ -268,7 +275,7 @@ def user(uid):
                 results.append(temp)
 
 
-    context = dict(results= results, username = uid)
+    context = dict(results= results, username = uid, lerror = lerror)
     return render_template("user.html", **context)
 
 # create user
@@ -277,10 +284,12 @@ def create_user():
     username = request.form['user']
 
     # add to the user table
-    cmd = 'INSERT INTO users(username) VALUES (:username)'
-    g.conn.execute(text(cmd), username=username)
-
-    return redirect('/users/%s' %(username))
+    try:
+        cmd = 'INSERT INTO users(username) VALUES (:username)'
+        g.conn.execute(text(cmd), username=username)
+        return redirect('/users/%s' %(username))
+    except IntegrityError:
+        return users(cuerror=1)
 
 # roster page
 @app.route('/rosters/<lid>/<uid>')
@@ -434,7 +443,7 @@ def league(lid):
     return render_template("league.html", **context)
 
 @app.route('/leagues/<lid>/<fmdid>')
-def fmd(lid, fmdid):
+def fmd(lid, fmdid, suerror = 0):
     matches_cursor = g.conn.execute("SELECT p.username_h, p.hteamgoals, p.ateamgoals, p.username_a FROM play_fantasy_match p JOIN fantasy_matchdays f ON f.fmdid = p.fmdid WHERE p.fmdid = %s AND f.lid = %s", fmdid, lid)
     matches = []
     for result in matches_cursor:
@@ -454,7 +463,7 @@ def fmd(lid, fmdid):
         users.append(result[0])
     users_cursor.close()
 
-    context = dict(matches = matches, lid = lid, lname = lname, fmdid = fmdid, users = users)
+    context = dict(matches = matches, lid = lid, lname = lname, fmdid = fmdid, users = users, suerror = suerror)
     return render_template("fantasymatchday.html", **context)
 
 @app.route('/create_fm/<lid>', methods=['POST'])
@@ -481,6 +490,9 @@ def create_fm(lid):
 def create_fmatch(lid, fmdid):
     username_h = request.form['username_h']
     username_a = request.form['username_a']
+
+    if username_h == username_a:
+        return fmd(lid, fmdid, suerror = 1)
 
     # first, get the score for the game, using the real-life scorers
     score_cursor = g.conn.execute("""WITH sc AS (SELECT ngoals, pid

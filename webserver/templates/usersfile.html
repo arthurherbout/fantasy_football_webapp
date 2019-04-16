@@ -21,6 +21,9 @@
   <p> Create a new user: <input type="text" name="user"> <input type="submit" value="Add"></p>
   </form>
 
+  {% if cuerror == 1 %}
+    <div> This username is already taken </div>
+  {% endif %}
 </body>
 
 

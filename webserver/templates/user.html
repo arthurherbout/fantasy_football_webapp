@@ -42,6 +42,10 @@
   <p> Join an existing fantasy league: <input type="text" name="league"> <input type="submit" value="Add"></p>
   </form>
 
+  {% if lerror == 1 %}
+  <div> {{username}} has already joined this league! </div>
+  {% endif %}
+
   <form method="POST" action="/create_league/{{username}}">
   <p>Create a new fantasy league: <input type="text" name="league"> <input type="submit" value="Add"></p>
   </form>
